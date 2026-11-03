@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FineART — structural integrity clean, annotation layer unmeasured | Robot Dataset Audits</title>
-<meta name="description" content="Audit of lerobot/FineART (40,543 episodes, 1,718 hours): six of six sampled episodes pass structural checks; the default video-freeze detector produces an 83% false-positive exclusion rate; the 533,913 subtask labels are outside the reach of current tooling.">
+<meta name="description" content="Audit of lerobot/FineART (40,543 episodes, 1,718 hours): six of six sampled episodes pass structural checks; the default video-freeze detector produced an 83% false-positive exclusion rate (fixed in RDA 0.12.2); the 533,913 subtask labels are outside the reach of current tooling.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://liesliy.github.io/rda-audits/datasets/fineart.html">
+<meta property="og:title" content="FineART: structural integrity clean, annotation layer unmeasured">
+<meta property="og:description" content="Six episodes, four cameras, real files. What passes, what the tooling gets wrong, and the 533,913 subtask labels no metric currently checks.">
+<meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -70,9 +75,10 @@
     </p>
     <p style="margin-bottom:0;">
       Re-running this exact 6-episode subset on the published 0.12.2 wheel returns
-      <strong>6/6 PASS, zero flagged regions, exit 0</strong>. Section 04 is kept as written: it is
-      the record of what 0.12.1 did to this data, and it is the reason the criterion exists in its
-      current form.
+      <strong>6/6 PASS, zero flagged regions, exit 0</strong>
+      (<a href="../evidence/fineart/rda_fineart_0.12.2.json">raw output</a>). Section 04 is kept as
+      written: it is the record of what 0.12.1 did to this data, and it is the reason the criterion
+      exists in its current form.
     </p>
   </div>
 
@@ -91,7 +97,8 @@
     <p>
       <strong>On the tooling:</strong> two failures. Default <code>rda audit</code> excludes 5 of 6
       episodes on a freeze-detector false positive, and the entire annotation layer &mdash; the reason
-      this dataset exists &mdash; has zero metric coverage.
+      this dataset exists &mdash; has zero metric coverage. The first is fixed in 0.12.2 (see the note
+      above); the second is not, and is the more consequential of the two.
     </p>
     <p class="small" style="margin-bottom:0;">
       Caveat on scope: six episodes is enough to characterise format handling and mechanism, not the
@@ -417,15 +424,20 @@ pip install robot-data-audit[parquet] "av&gt;=12" "opencv-python-headless"
 <span class="c"># structural pass only — fast, whole corpus is feasible</span>
 rda audit /data/FineART --no-video --format json -o fineart_novideo.json
 
-<span class="c"># video layer on a shard — use the state stream as motion source</span>
+<span class="c"># video layer on a shard — 0.12.1 only: the state stream was needed to suppress the false positive</span>
 rda audit /data/FineART_fold0 --freeze-motion-source state --format json -o fold0.json
+
+<span class="c"># video layer, 0.12.2 criterion — the re-run quoted in the note at the top of this entry</span>
+rda audit /data/FineART_fold0 --format json -o fold0_0122.json
 
 <span class="c"># render a shareable report</span>
 python tools/rda_render.py fold0.json --html report.html --badge badge.svg</code></pre>
     <p class="small" style="margin-top:-8px;">
-      Reading discipline: a clean <code>--no-video</code> run says nothing about the video layer. The
-      video layer must be run with <code>--freeze-motion-source state</code> on FineART, or it will
-      exclude most of the corpus.
+      Reading discipline: a clean <code>--no-video</code> run says nothing about the video layer. On
+      0.12.1 the video layer had to be run with <code>--freeze-motion-source state</code> on FineART,
+      or it would exclude most of the corpus &mdash; that was a defect in the freeze criterion, not a
+      property of the data. From 0.12.2 the default criterion is correct here and the flag is no
+      longer needed.
     </p>
   </div>
 
@@ -468,6 +480,7 @@ python tools/rda_render.py fold0.json --html report.html --badge badge.svg</code
         <tr><td><a href="../evidence/fineart/rda_report_injected_defects.json"><code>rda_report_injected_defects.json</code></a></td><td>Defect-injection run &mdash; 2 EXCLUDE / 4 PASS</td></tr>
         <tr><td><a href="../evidence/fineart/freeze_crosscheck.log"><code>freeze_crosscheck.log</code></a></td><td>Full-resolution re-measurement of all 36 flagged regions</td></tr>
         <tr><td><a href="../evidence/fineart/subtask_probe.log"><code>subtask_probe.log</code></a></td><td>Annotation-layer probe &mdash; 242 episodes, 2,108 segments</td></tr>
+        <tr><td><a href="../evidence/fineart/rda_fineart_0.12.2.json"><code>rda_fineart_0.12.2.json</code></a></td><td>Same 6 episodes on 0.12.2 &mdash; 6 PASS, 0 flagged regions, exit 0; per-camera motion profile in <code>details.stream_motion_profile</code></td></tr>
       </tbody>
     </table>
   </div>

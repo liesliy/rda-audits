@@ -3,6 +3,8 @@
 A public ledger of reproducible audits on open robot-learning datasets.
 
 **Published site:** https://liesliy.github.io/rda-audits/
+**Audit tool:** [`robot-data-audit`](https://pypi.org/project/robot-data-audit/) 0.12.2 ·
+[source](https://github.com/liesliy/rda)
 
 ## What this is
 
@@ -42,9 +44,20 @@ programmatically (benchmark tables, dataset selection, CI checks), that file is 
 
 | # | Dataset | Verdict | Audited |
 |---|---|---|---|
-| 01 | [FineART](datasets/fineart.html) — Scale AI × Hugging Face LeRobot | pass with caveats | 2026-11-02 |
+| 01 | [FineART](datasets/fineart.html) — Scale AI × Hugging Face LeRobot | pass with caveats | 2026-11-02 (rechecked 2026-11-03 on 0.12.2) |
 
 Queued: `droid_1.0.1`, `libero`, `pusht`, `aloha_sim_transfer_cube_human`.
+
+## Status of published findings
+
+| Finding | Status |
+|---|---|
+| `video_freeze` false positive — 5 of 6 episodes excluded on healthy data | Tool defect, **fixed in 0.12.2** (criterion now detects duplicated frames instead of small frame differences). Same subset re-runs 6/6 PASS, exit 0. |
+| Annotation layer has zero metric coverage (`language_persistent` / `language_events` dropped by the loader) | **Open.** This is the dataset's main value and no mainstream tool checks it. |
+| Trailing-gap reading in an earlier draft | **Withdrawn** — misread of the annotation protocol, correction kept in the entry. |
+
+Evidence files under `evidence/` are raw tool output, unedited. Absolute paths in them reflect the
+machine the audit ran on.
 
 ## Disclosure
 

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Robot Dataset Audits — a quality ledger for open robot-learning datasets</title>
 <meta name="description" content="Reproducible audits of open robot-learning datasets: structural integrity, annotation-layer consistency, and what current tooling actually fails to check.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://liesliy.github.io/rda-audits/">
+<meta property="og:title" content="Robot Dataset Audits — a quality ledger for open robot-learning datasets">
+<meta property="og:description" content="Every entry is a dataset we downloaded and ran tooling against on real files. Numbers are measured, not quoted from dataset cards. Where the tooling is wrong, the entry says so.">
+<meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -34,10 +39,13 @@
 
   <div class="col">
     <div class="disclosure">
-      <b>Disclosure.</b> The audit tool used here, <code>robot-data-audit</code> (RDA), is maintained
-      by the author of this ledger. That is a conflict of interest, and it cuts both ways: the
-      ledger is not an independent certification, and several of the findings below are cases where
-      RDA produced <em>incorrect</em> verdicts. Every claim links to a command you can re-run.
+      <b>Disclosure.</b> The audit tool used here,
+      <a href="https://github.com/liesliy/rda">robot-data-audit</a> (RDA), is maintained by the author
+      of this ledger. That is a conflict of interest, and it cuts both ways: the ledger is not an
+      independent certification, and several of the findings below are cases where RDA produced
+      <em>incorrect</em> verdicts. The one such defect published so far was fixed upstream and
+      released as 0.12.2 on 2026-11-03 &mdash; the entry keeps both the wrong result and its
+      correction. Every claim links to a command you can re-run.
     </div>
   </div>
 
@@ -263,14 +271,15 @@
     </p>
 
     <p class="small">
-      Tool: <code>robot-data-audit</code> &middot; entries are generated from JSON audit output plus
-      independent verification scripts; both are kept alongside each entry.
+      Tool: <a href="https://pypi.org/project/robot-data-audit/"><code>robot-data-audit</code></a>
+      &middot; entries are generated from JSON audit output plus independent verification scripts;
+      both are kept alongside each entry.
     </p>
   </div>
 
   <footer class="site">
     <span>Robot Dataset Audits &middot; 2026</span>
-    <span><a href="https://github.com/liesliy/rda-audits">Source</a> &middot; <a href="datasets/fineart.html">FineART entry &rarr;</a></span>
+    <span><a href="https://github.com/liesliy/rda-audits">Source</a> &middot; <a href="https://github.com/liesliy/rda">Audit tool (RDA)</a> &middot; <a href="datasets/fineart.html">FineART entry &rarr;</a></span>
   </footer>
 
 </main>
