@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot Dataset Audits — a quality ledger for open robot-learning datasets</title>
+<meta name="description" content="Reproducible audits of open robot-learning datasets: structural integrity, annotation-layer consistency, and what current tooling actually fails to check.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="index.html">Robot Dataset Audits <span>/ ledger</span></a>
+    <nav class="site">
+      <a href="index.html#ledger">Ledger</a>
+      <a href="index.html#method">Method</a>
+      <a href="datasets/fineart.html">FineART</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="col">
+    <h1>What open robot datasets actually contain &mdash; and what nobody checks</h1>
+
+    <p class="lede">
+      Every entry in this ledger is a dataset we downloaded and ran tooling against, at full
+      resolution, on real files. Numbers are measured, not quoted from dataset cards. Where the
+      tooling is wrong, the entry says so.
+    </p>
+  </div>
+
+  <div class="col">
+    <div class="disclosure">
+      <b>Disclosure.</b> The audit tool used here, <code>robot-data-audit</code> (RDA), is maintained
+      by the author of this ledger. That is a conflict of interest, and it cuts both ways: the
+      ledger is not an independent certification, and several of the findings below are cases where
+      RDA produced <em>incorrect</em> verdicts. Every claim links to a command you can re-run.
+    </div>
+  </div>
+
+  <!-- ================= LEDGER ================= -->
+  <h2 id="ledger"><span class="num">01</span>The ledger</h2>
+
+  <div class="col">
+    <p>
+      One row per dataset. <em>Structural</em> covers the parquet and video layers &mdash; row counts,
+      dtypes, timestamps, frame integrity. <em>Annotation</em> covers the language layer &mdash;
+      subtask segmentation, timestamp monotonicity, temporal coverage. <em>Verdict</em> is our
+      judgement after reconciling tool output against independent re-measurement, not the raw
+      exit code.
+    </p>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Dataset</th>
+          <th>Scale</th>
+          <th>Format</th>
+          <th>Structural</th>
+          <th>Annotation</th>
+          <th>Verdict</th>
+          <th>Audited</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a class="row-link" href="datasets/fineart.html">FineART</a><br><span class="small">Scale AI &times; Hugging Face LeRobot</span></td>
+          <td class="num">40,543 ep<br>1,718 h</td>
+          <td class="num">v3.0</td>
+          <td><span class="pill pass">6/6 clean</span></td>
+          <td><span class="pill warn">uncovered</span></td>
+          <td><span class="pill warn">pass with caveats</span></td>
+          <td class="num">2026-11-02</td>
+        </tr>
+        <tr>
+          <td>droid_1.0.1</td>
+          <td class="num">&mdash;</td>
+          <td class="num">&mdash;</td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td class="num">&mdash;</td>
+        </tr>
+        <tr>
+          <td>libero</td>
+          <td class="num">&mdash;</td>
+          <td class="num">&mdash;</td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td class="num">&mdash;</td>
+        </tr>
+        <tr>
+          <td>pusht</td>
+          <td class="num">&mdash;</td>
+          <td class="num">&mdash;</td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td class="num">&mdash;</td>
+        </tr>
+        <tr>
+          <td>aloha_sim_transfer_cube_human</td>
+          <td class="num">&mdash;</td>
+          <td class="num">&mdash;</td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td><span class="pill na">queued</span></td>
+          <td class="num">&mdash;</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p class="small">
+      Queued entries are listed because they share the same v3.0 layout and the same open tooling
+      path. They have not been audited; they carry no verdict. Rows are added only after a full
+      run on downloaded data.
+    </p>
+  </div>
+
+  <!-- ================= WHY ================= -->
+  <h2 id="why"><span class="num">02</span>Why a ledger, and not a leaderboard</h2>
+
+  <div class="col">
+    <p>
+      A dataset that is structurally valid can still be semantically broken. The failure modes that
+      actually cost training runs &mdash; a camera that stopped recording while the state stream kept
+      going, a subtask timeline that drifts by seconds, a frame count that disagrees with the video
+      container &mdash; are invisible to a load that succeeds. They surface as a policy that trains
+      fine and fails in evaluation, or as a two-day debugging session in the middle of a run.
+    </p>
+
+    <p>
+      The problem is not that these checks are hard. Most of them are trivial to compute once the
+      data is on disk. The problem is that <strong>nobody runs them</strong>: the dataset is 1.86 TB,
+      the download takes hours, and by the time it lands the team wants to train, not to audit.
+    </p>
+
+    <p>
+      So this ledger has one narrow purpose: run the checks people skip, publish the numbers, and be
+      explicit about what the checks miss. It is a public record, not a score. A dataset scoring
+      badly here is not a bad dataset &mdash; it means a specific property was measured and found
+      wanting, with the exact measurement attached.
+    </p>
+  </div>
+
+  <div class="grid-cards">
+    <div class="card">
+      <span class="kicker">Covered</span>
+      <h3>Structural integrity</h3>
+      <p>Schema conformance, NaN/Inf, timestamp validity, video frame counts against container
+        metadata, stream presence, A/V offset and drift.</p>
+    </div>
+    <div class="card">
+      <span class="kicker">Covered, with effort</span>
+      <h3>Annotation consistency</h3>
+      <p>Subtask counts against episode metadata, timestamp monotonicity, empty text, temporal
+        coverage at episode boundaries. Requires custom code &mdash; no mainstream tool ships this.</p>
+    </div>
+    <div class="card">
+      <span class="kicker">Not covered</span>
+      <h3>Semantic correctness</h3>
+      <p>Whether the label describes what the robot is doing. This is not an automated check and no
+        entry in this ledger should be read as claiming it.</p>
+    </div>
+  </div>
+
+  <!-- ================= METHOD ================= -->
+  <h2 id="method"><span class="num">03</span>Method</h2>
+
+  <div class="col">
+    <p>
+      Four rules govern every entry. They exist because dataset audits fail in a predictable way:
+      the tool reports something, nobody re-measures it, and a false positive becomes a published
+      conclusion.
+    </p>
+
+    <ol>
+      <li>
+        <strong>Download, do not infer.</strong> Every entry is produced by running on real files.
+        Sample size and selection are stated explicitly; conclusions about format and mechanism are
+        separated from conclusions about the full distribution.
+      </li>
+      <li>
+        <strong>Re-measure anything the tool flags.</strong> A verdict is never a raw exit code. When
+        RDA excludes an episode, the underlying signal is decoded again from scratch &mdash; at full
+        resolution, independent of the tool &mdash; before it is reported.
+      </li>
+      <li>
+        <strong>Separate fact from inference.</strong> Measured values are stated as measurements.
+        Generalisations (&ldquo;this will recur on other datasets of the same family&rdquo;) are
+        labelled as inference and left unverified until a second dataset is audited.
+      </li>
+      <li>
+        <strong>Publish the commands.</strong> If a result cannot be reproduced from the
+        commands in the entry, it does not belong in the ledger.
+      </li>
+    </ol>
+
+    <h3>Verdict vocabulary</h3>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Verdict</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="pill pass">pass</span></td>
+          <td>All covered checks ran and returned clean, on a sample large enough to state it.</td>
+        </tr>
+        <tr>
+          <td><span class="pill warn">pass with caveats</span></td>
+          <td>Covered checks are clean, but either the sample is small, a check returned no verdict,
+            or a layer of the dataset is not reachable by current tooling.</td>
+        </tr>
+        <tr>
+          <td><span class="pill fail">fail</span></td>
+          <td>A defect was confirmed by independent re-measurement, not merely flagged.</td>
+        </tr>
+        <tr>
+          <td><span class="pill na">uncovered</span></td>
+          <td>The dataset has this layer; the tooling has no metric for it. Recorded as a tooling
+            gap, not as a dataset defect.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <h3>What this ledger does not do</h3>
+    <ul>
+      <li>It does not certify a dataset. Absence of findings is bounded by the sample and the metric set.</li>
+      <li>It does not score datasets against each other. Coverage differs; a single number would hide that.</li>
+      <li>It does not audit semantics. A clean run says nothing about whether the labels are <em>true</em>.</li>
+    </ul>
+  </div>
+
+  <!-- ================= CONTACT ================= -->
+  <h2 id="contact"><span class="num">04</span>Corrections and requests</h2>
+
+  <div class="col">
+    <p>
+      If an entry misrepresents your dataset, say so and it gets corrected in place, with the
+      correction visible &mdash; the FineART entry already contains one such correction, kept rather
+      than deleted.
+    </p>
+
+    <p>
+      If you maintain a dataset and want it audited, or you have in-house robot data that needs the
+      same treatment with a private report, get in touch at
+      <a href="mailto:luoxi@touchlabelai.cn">luoxi@touchlabelai.cn</a> or open an issue on
+      <a href="https://github.com/liesliy/rda-audits">GitHub</a>. The audit path is the same; only
+      the distribution differs.
+    </p>
+
+    <p class="small">
+      Tool: <code>robot-data-audit</code> &middot; entries are generated from JSON audit output plus
+      independent verification scripts; both are kept alongside each entry.
+    </p>
+  </div>
+
+  <footer class="site">
+    <span>Robot Dataset Audits &middot; 2026</span>
+    <span><a href="https://github.com/liesliy/rda-audits">Source</a> &middot; <a href="datasets/fineart.html">FineART entry &rarr;</a></span>
+  </footer>
+
+</main>
+
+</body>
+</html>

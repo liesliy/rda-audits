@@ -1,0 +1,12 @@
+episodes: 242 | subtasks total: 2108 | meta total: 2108
+count mismatch: 0 | non-monotonic: 0 | blank text: 0
+first-subtask ts: mean 2.79s  p50 2.20s  p90 5.19s  max 14.10s
+episodes whose first subtask starts >1s after t=0: 235
+last subtask reaches episode end: 0 / 242
+tail gap (episode end - last subtask ts): p50 8.80s  p90 15.08s  max 21.83s
+min gap: p50 %.2fs  min %.3fs | gap<0.1s: 0 | overlapping(<0): 0
+max gap: p50 22.85s  p99 60.73s  max 92.80s
+roles: {('assistant',)}
+styles: {('subtask',)}
+episodes with language_events non-empty: 0
+subtasks per episode: min 5 p50 8 max 17

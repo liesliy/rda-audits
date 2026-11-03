@@ -1,0 +1,177 @@
+{
+  "ledger": "Robot Dataset Audits",
+  "updated": "2026-11-03",
+  "tool": {
+    "name": "robot-data-audit",
+    "version": "0.12.1",
+    "source": "pypi"
+  },
+  "schema": {
+    "verdict": ["pass", "pass_with_caveats", "fail", "uncovered", "queued"],
+    "note": "verdict is the author's judgement after reconciling tool output against independent re-measurement; it is never the raw exit code."
+  },
+  "entries": [
+    {
+      "id": "fineart",
+      "name": "FineART",
+      "repo": "lerobot/FineART",
+      "publisher": "Scale AI × Hugging Face LeRobot",
+      "url": "datasets/fineart.html",
+      "format": "lerobot-v3.0",
+      "robot": "Trossen Stationary AI (aloha)",
+      "episodes": 40543,
+      "frames": 185534500,
+      "hours": 1718,
+      "tasks": 151,
+      "annotation_segments": 533913,
+      "size_tb": 1.86,
+      "license": "CC BY 4.0 (data); Gemma license (weights)",
+      "sample": {
+        "episodes": 6,
+        "episode_indices": [0, 1, 2, 3, 4, 5],
+        "frames": 13949,
+        "fraction_of_corpus": 0.00015
+      },
+      "audited": "2026-11-02",
+      "verdict": "pass_with_caveats",
+      "structural": {
+        "verdict": "pass",
+        "episodes_passed": 6,
+        "episodes_total": 6,
+        "checks_clean": [
+          "missing_dropout",
+          "invalid_values",
+          "schema_consistency",
+          "timestamp_validity",
+          "video_frame_integrity",
+          "video_stream_presence",
+          "video_timestamp_alignment",
+          "video_stream_span",
+          "video_stream_offset",
+          "video_stream_drift",
+          "pii_scan"
+        ],
+        "checks_not_applicable": {
+          "joint_limit": "joint_limits_not_provided",
+          "sensor_synchronization": "no stream timestamps"
+        },
+        "diagnostics": {
+          "action_discontinuity": {
+            "spikes": 108,
+            "episodes_affected": 5,
+            "interpretation": "consistent with grasp/release events at 30 fps; not treated as a defect"
+          }
+        }
+      },
+      "detection_validation": {
+        "method": "defect injection on a copy of the subset",
+        "injected": [
+          {"episode": 3, "defect": "10 frames of observation.state set to NaN", "detected": true, "reason": "invalid_values (L1): 10 NaN + 0 Inf values"},
+          {"episode": 4, "defect": "50 consecutive frames removed", "detected": true, "reason": "missing_dropout (L1): 50 missing frame(s)"}
+        ],
+        "false_negatives": 0,
+        "collateral_exclusions": 0
+      },
+      "tooling_findings": [
+        {
+          "id": "freeze_false_positive",
+          "severity": "high",
+          "check": "video_freeze",
+          "default_run": {"pass": 0, "review": 1, "exclude": 5, "exit_code": 2, "wall_seconds": 292},
+          "mitigated_run": {
+            "flags": ["--freeze-motion-source", "state"],
+            "pass": 0,
+            "review": 6,
+            "exclude": 0,
+            "exit_code": 0,
+            "wall_seconds": 298
+          },
+          "flagged_regions": 36,
+          "flagged_by_camera": {
+            "cam_high": 30,
+            "cam_low": 6,
+            "cam_left_wrist": 0,
+            "cam_right_wrist": 0
+          },
+          "independent_recheck": {
+            "method": "full-resolution grayscale re-decode, per-frame mean absolute difference",
+            "region_diff_range": [0.10, 0.15],
+            "episode_median_diff_range": [0.29, 0.87],
+            "ratio_range": [0.08, 0.44],
+            "regions_approaching_true_freeze": 3,
+            "true_freeze_locations": "cam_low, episode 5"
+          },
+          "conclusion": "false positives; the regions contain real motion at low amplitude",
+          "status": "open"
+        },
+        {
+          "id": "annotation_layer_uncovered",
+          "severity": "high",
+          "scope": ["language_persistent", "language_events", "episode summary", "success metadata"],
+          "metric_coverage": 0,
+          "cause": "columns match neither observation.* nor action, dropped in _extract_episode_from_dataframe",
+          "status": "open"
+        },
+        {
+          "id": "joint_limit_inapplicable",
+          "severity": "medium",
+          "cause": "joint_limits absent from info.json; no Trossen/ALOHA platform profile in tool",
+          "note": "the only physical hard gate in the metric set is silently inapplicable",
+          "status": "open"
+        },
+        {
+          "id": "sensor_sync_unused",
+          "severity": "low",
+          "cause": "per-camera from_timestamp/to_timestamp exist in episode metadata but are not consumed",
+          "status": "open"
+        },
+        {
+          "id": "pii_scan_scope",
+          "severity": "low",
+          "cause": "pii_scan iterates episode metadata and feature names only; annotation free text not scanned",
+          "status": "open"
+        },
+        {
+          "id": "robot_type_unknown",
+          "severity": "low",
+          "cause": "robot_type: aloha rendered as unknown in acceptance summary",
+          "status": "open"
+        }
+      ],
+      "annotation_probe": {
+        "method": "standalone script, independent of the tool",
+        "scope": {"episodes": 242, "segments": 2108, "source": "data/chunk-000/file-000.parquet"},
+        "segment_count_matches_metadata": true,
+        "monotonic_timestamps": true,
+        "empty_segments": 0,
+        "first_segment_start_seconds": {"mean": 2.79, "p90": 5.19, "max": 14.10, "episodes_over_1s": 235},
+        "trailing_gap_seconds": {"p50": 8.80, "p90": 15.08, "max": 21.83, "is_defect": false},
+        "adjacent_gap_seconds": {"p50": 22.85, "p99": 60.73, "max": 92.80},
+        "language_events_empty_episodes": 242,
+        "operational_note": "frames before the first subtask have no active label in 235 of 242 episodes; loaders must handle this branch explicitly"
+      },
+      "cost": {
+        "seconds_per_episode_with_video": 49,
+        "extrapolated_hours_full_corpus": 550,
+        "no_video_wall_seconds_for_6_episodes": 1.8,
+        "peak_memory_gb": 0.9
+      }
+    }
+  ],
+  "queued": [
+    {"repo": "lerobot/droid_1.0.1", "reason": "same v3.0 layout, next in queue"},
+    {"repo": "lerobot/libero", "reason": "no subtask annotations; structural-only audit"},
+    {"repo": "lerobot/pusht", "reason": "v2.1 format; tests backwards compatibility path"},
+    {"repo": "lerobot/aloha_sim_transfer_cube_human", "reason": "simulated ALOHA; tests whether the freeze false positive reproduces"}
+  ],
+  "corrections": [
+    {
+      "date": "2026-11-03",
+      "entry": "fineart",
+      "field": "annotation_probe.trailing_gap",
+      "was": "reported as an uncovered region",
+      "now": "not a defect — the dataset card defines the final segment as running to episode end",
+      "cause": "misread of the annotation protocol"
+    }
+  ]
+}

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FineART — structural integrity clean, annotation layer unmeasured | Robot Dataset Audits</title>
+<meta name="description" content="Audit of lerobot/FineART (40,543 episodes, 1,718 hours): six of six sampled episodes pass structural checks; the default video-freeze detector produces an 83% false-positive exclusion rate; the 533,913 subtask labels are outside the reach of current tooling.">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="../index.html">Robot Dataset Audits <span>/ ledger</span></a>
+    <nav class="site">
+      <a href="../index.html#ledger">Ledger</a>
+      <a href="../index.html#method">Method</a>
+      <a href="fineart.html">FineART</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="col">
+    <p class="small" style="margin-bottom:10px;">
+      <a href="../index.html">&larr; Ledger</a> &middot; Entry 01
+    </p>
+    <h1 class="report-title">FineART: structurally clean, semantically unmeasured</h1>
+    <p class="lede">
+      Six sampled episodes of Scale AI &times; Hugging Face's 1,718-hour bimanual dataset pass every
+      structural check available. The dataset's distinguishing feature &mdash; 533,913 dense subtask
+      labels &mdash; is not reachable by any metric in current tooling. The default configuration of
+      the audit tool also rejects 83% of legitimate episodes. Both statements are measurements.
+    </p>
+  </div>
+
+  <div class="col">
+    <div class="meta">
+      <dl>
+        <dt>Dataset</dt>
+        <dd><code>lerobot/FineART</code> &mdash; co-released by Scale AI and Hugging Face LeRobot</dd>
+        <dt>Scale</dt>
+        <dd>40,543 episodes &middot; 185,534,500 frames &middot; 1,718 hours &middot; 151 tasks</dd>
+        <dt>Format</dt>
+        <dd>LeRobot dataset v3.0 &middot; <code>robot_type: aloha</code> &middot; Trossen Stationary AI</dd>
+        <dt>Sample</dt>
+        <dd>6 episodes (index 0&ndash;5) &middot; 13,949 frames &middot; 0.015% of the corpus</dd>
+        <dt>Tool</dt>
+        <dd><code>robot-data-audit</code> 0.12.1, installed from PyPI (not the source tree)</dd>
+        <dt>Environment</dt>
+        <dd>Python 3.13 &middot; av 19.0.2 &middot; OpenCV 4.14.0 &mdash; video layer active, not degraded</dd>
+        <dt>Audited</dt>
+        <dd>2026-11-02</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- ============ VERDICT ============ -->
+  <div class="verdict">
+    <div class="top">
+      <h2>Verdict</h2>
+      <span class="pill warn">pass with caveats</span>
+    </div>
+    <p>
+      <strong>On the dataset:</strong> no structural defect found. Six of six sampled episodes pass
+      schema conformance, invalid-value, timestamp, dropout, and video-frame-integrity checks. The
+      v3.0 shared-MP4 slicing logic reads correctly, including per-camera
+      <code>from_timestamp</code> / <code>to_timestamp</code> offsets.
+    </p>
+    <p>
+      <strong>On the tooling:</strong> two failures. Default <code>rda audit</code> excludes 5 of 6
+      episodes on a freeze-detector false positive, and the entire annotation layer &mdash; the reason
+      this dataset exists &mdash; has zero metric coverage.
+    </p>
+    <p class="small" style="margin-bottom:0;">
+      Caveat on scope: six episodes is enough to characterise format handling and mechanism, not the
+      full-corpus defect distribution. Nothing here should be read as a statement about all 40,543 episodes.
+    </p>
+  </div>
+
+  <!-- ============ 01 WHAT ============ -->
+  <h2><span class="num">01</span>What was audited</h2>
+
+  <div class="col">
+    <p>
+      FineART is a bimanual manipulation corpus recorded on a Trossen Stationary AI system with ALOHA2
+      grippers: four cameras at 360&times;640 and 30&nbsp;fps, 14-dimensional joint-plus-gripper state and
+      action, roughly 1.86&nbsp;TB on the Hub. The property that separates it from other open
+      bimanual datasets is annotation density: 533,913 human-written subtask segments, about 13 per
+      episode, covering the full recorded duration rather than a filtered subset.
+    </p>
+    <p>
+      The sample is the first six episodes of <code>data/chunk-000/file-000.parquet</code> (116&nbsp;MB)
+      plus the 24 corresponding MP4s, four cameras per episode (&asymp;130&nbsp;MB). The subset was
+      materialised as a standalone dataset directory with <code>info.json</code> rewritten to the
+      subset's true <code>total_episodes</code> and <code>total_frames</code>, so that episode-count
+      checks would be evaluated against real values rather than the full corpus.
+    </p>
+    <p>
+      All six episodes are drawn from a single task family (pick-and-place of candle holders). That is
+      deliberate &mdash; it tests whether format handling works &mdash; and it is also the reason no
+      distributional claim is made below.
+    </p>
+  </div>
+
+  <!-- ============ 02 STRUCTURAL ============ -->
+  <h2><span class="num">02</span>Structural layer: no defect found</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Check</th><th>Result</th><th>Note</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>missing_dropout</code></td><td><span class="pill pass">6/6 pass</span></td><td>No gaps in <code>frame_index</code> or <code>timestamp</code></td></tr>
+        <tr><td><code>invalid_values</code></td><td><span class="pill pass">6/6 pass</span></td><td>No NaN or Inf in state or action</td></tr>
+        <tr><td><code>schema_consistency</code></td><td><span class="pill pass">6/6 pass</span></td><td>Dtypes and shapes stable across episodes</td></tr>
+        <tr><td><code>timestamp_validity</code></td><td><span class="pill pass">6/6 pass</span></td><td>Monotonic, no duplicates</td></tr>
+        <tr><td><code>video_frame_integrity</code></td><td><span class="pill pass">6/6 pass</span></td><td>Decoded frame counts match v3.0 slice metadata</td></tr>
+        <tr><td><code>video_stream_presence</code></td><td><span class="pill pass">6/6 pass</span></td><td>All four cameras present in every episode</td></tr>
+        <tr><td><code>video_timestamp_alignment</code></td><td><span class="pill pass">6/6 pass</span></td><td>A/V offset within tolerance</td></tr>
+        <tr><td><code>video_stream_span</code>, <code>offset</code>, <code>drift</code></td><td><span class="pill pass">measured</span></td><td>Computed, not <code>UNDETERMINED</code></td></tr>
+        <tr><td><code>pii_scan</code></td><td><span class="pill pass">clean</span></td><td>19 text surfaces scanned, zero findings</td></tr>
+        <tr><td><code>joint_limit</code></td><td><span class="pill na">N/A</span></td><td><code>joint_limits_not_provided</code> &mdash; see &sect;05</td></tr>
+        <tr><td><code>sensor_synchronization</code></td><td><span class="pill na">N/A</span></td><td>&ldquo;no stream timestamps&rdquo; &mdash; see &sect;05</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>
+      One diagnostic surfaced that is worth flagging to the training side rather than as a defect:
+      <code>action_discontinuity</code> reported <strong>108 discontinuities across 5 episodes</strong>.
+      With 30&nbsp;fps teleoperation and 50&nbsp;Hz control, single-frame action jumps are expected at
+      grasp and release events; the count is consistent with that reading. It is recorded here because
+      it is the one structural signal that is non-zero, not because it indicates damage.
+    </p>
+  </div>
+
+  <!-- ============ 03 INJECTION ============ -->
+  <h2><span class="num">03</span>Verifying that detection works at all</h2>
+
+  <div class="col">
+    <p>
+      A clean result is only meaningful if the checker can fail. To test that, two defects were
+      injected into a copy of the subset and the audit re-run:
+    </p>
+    <ul>
+      <li>Episode 3: 10 frames of <code>observation.state</code> set to <code>NaN</code> (dimension 2)</li>
+      <li>Episode 4: 50 consecutive frames deleted from the middle, leaving a <code>frame_index</code> gap of 50</li>
+    </ul>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Episode</th><th>Injected defect</th><th>Verdict</th><th>Reason emitted</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="num">0, 1, 2, 5</td><td>none</td><td><span class="pill pass">PASS</span></td><td>&mdash;</td></tr>
+        <tr><td class="num">3</td><td>10 NaN frames</td><td><span class="pill fail">EXCLUDE</span></td><td><code>invalid_values (L1): 10 NaN + 0 Inf values</code></td></tr>
+        <tr><td class="num">4</td><td>50 frames removed</td><td><span class="pill fail">EXCLUDE</span></td><td><code>missing_dropout (L1): 50 missing frame(s)</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>
+      Both defects were caught, attributed to the correct episode, and reported with the exact count.
+      The four untouched episodes stayed clean. <strong>Detection works.</strong> The failures below are
+      failures of default sensitivity and of coverage, not of mechanism.
+    </p>
+  </div>
+
+  <!-- ============ 04 FALSE POSITIVE ============ -->
+  <h2><span class="num">04</span>Default configuration rejects 83% of legitimate episodes</h2>
+
+  <div class="col">
+    <p>
+      Run with defaults, the audit excludes five of six episodes on a single rule,
+      <code>video_freeze_while_moving</code>. Run with the motion source switched to the state stream,
+      the same data yields zero exclusions.
+    </p>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Invocation</th><th class="num">Pass</th><th class="num">Review</th><th class="num">Exclude</th><th class="num">Exit</th><th class="num">Wall time</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>rda audit &lt;subset&gt;</code> (default, action)</td><td class="num">0</td><td class="num">1</td><td class="num">5</td><td class="num">2</td><td class="num">292 s</td></tr>
+        <tr><td><code>--freeze-motion-source state</code></td><td class="num">0</td><td class="num">6</td><td class="num">0</td><td class="num">0</td><td class="num">298 s</td></tr>
+        <tr><td><code>--no-video</code></td><td class="num">6</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1.8 s</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <h3>Independent re-measurement</h3>
+    <p>
+      The tool's verdict was not accepted. All 36 flagged regions were decoded again at full
+      resolution with an independent script, and per-frame mean absolute difference was computed in
+      grayscale &mdash; first at the tool's working resolution (64&times;64), then at source resolution.
+    </p>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Observation</th><th>Measured</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Flagged regions by camera</td><td><code>cam_high</code> 30 &middot; <code>cam_low</code> 6 &middot; <code>cam_left_wrist</code> 0 &middot; <code>cam_right_wrist</code> 0</td></tr>
+        <tr><td>Full-resolution frame difference inside flagged regions</td><td class="num">0.10 &ndash; 0.15</td></tr>
+        <tr><td>Median frame difference, same camera, same episode</td><td class="num">0.29 &ndash; 0.87</td></tr>
+        <tr><td>Ratio (region / episode median)</td><td class="num">0.08 &ndash; 0.44</td></tr>
+        <tr><td>Regions with motion below 10% of episode median (approaching genuine freeze)</td><td class="num">3 / 36 &mdash; all in <code>cam_low</code>, episode 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>
+      The picture is moving in all 36 regions. It is moving <em>little</em>: a bird's-eye camera over a
+      640&times;360 frame in which the robot occupies a small fraction of the sensor. Downsampled to
+      64&times;64 grayscale, with a fixed epsilon floor of 0.10 on frame difference, that motion
+      approaches the noise floor. The motion gate, meanwhile, is driven by the action stream, which at
+      30&nbsp;fps is essentially never still. &ldquo;Action is moving&rdquo; plus &ldquo;pixels are
+      barely changing&rdquo; is then scored as a frozen camera, i.e. corrupt video.
+    </p>
+
+    <div class="note">
+      <span class="label">Fact vs inference</span>
+      <p>
+        <strong>Measured:</strong> the 36 flagged regions contain real, continuous pixel change; the
+        exclusion verdicts are false positives; switching the motion source to state removes them
+        without masking any true defect in this sample.
+      </p>
+      <p style="margin-bottom:0;">
+        <strong>Inference, unverified:</strong> this is a pattern of fixed-elevation cameras combined
+        with downsampling and a fixed epsilon, so other ALOHA-family datasets with a bird's-eye camera
+        will likely reproduce it. No second dataset has been audited yet; the claim stays unverified
+        until one is.
+      </p>
+    </div>
+
+    <p>
+      <strong>Practical consequence:</strong> the default invocation cannot be used as an acceptance
+      gate on this dataset. It rejects 83% of valid episodes and returns exit code 2. Either pass
+      <code>--freeze-motion-source state</code>, or whitelist the two static cameras, or make epsilon
+      adaptive per camera &mdash; none of which is currently reachable from the CLI without editing code.
+    </p>
+  </div>
+
+  <!-- ============ 05 COVERAGE ============ -->
+  <h2><span class="num">05</span>Coverage gap: what the audit cannot see</h2>
+
+  <div class="col">
+    <p>
+      This section is about the tool, not the dataset. Each row is a property FineART has and current
+      tooling has no metric for &mdash; recorded so that a clean verdict is not mistaken for full
+      coverage.
+    </p>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>FineART property</th><th>Tooling status</th><th>Cause</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>533,913 subtask labels (<code>language_persistent</code>)</td>
+          <td><span class="pill fail">no metric</span></td>
+          <td>Columns match neither <code>observation.*</code> nor action, so they are dropped in <code>_extract_episode_from_dataframe</code></td>
+        </tr>
+        <tr>
+          <td><code>language_events</code></td>
+          <td><span class="pill fail">no metric</span></td>
+          <td>Same path; not read at all</td>
+        </tr>
+        <tr>
+          <td>Episode-level summary (success, execution quality)</td>
+          <td><span class="pill fail">no metric</span></td>
+          <td>No success-rate check exists in the metric set</td>
+        </tr>
+        <tr>
+          <td><code>joint_limit</code> &mdash; the only physical hard gate</td>
+          <td><span class="pill na">N/A</span></td>
+          <td>Read solely from <code>info.json: joint_limits</code>, which FineART omits; no Trossen or ALOHA platform profile exists in the tool</td>
+        </tr>
+        <tr>
+          <td>Per-camera <code>from_timestamp</code> / <code>to_timestamp</code></td>
+          <td><span class="pill na">N/A</span></td>
+          <td><code>sensor_synchronization</code> reports &ldquo;no stream timestamps&rdquo; although the episode metadata carries them</td>
+        </tr>
+        <tr>
+          <td>Free text inside annotations</td>
+          <td><span class="pill fail">not scanned</span></td>
+          <td><code>pii_scan</code> iterates episode metadata and feature names only</td>
+        </tr>
+        <tr>
+          <td><code>robot_type: aloha</code></td>
+          <td><span class="pill warn">misreported</span></td>
+          <td>Rendered as <code>unknown</code> in the acceptance summary</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>
+      The <code>joint_limit</code> row matters more than it looks. It is the only check in the entire
+      tool that asserts a physical constraint on the data; on FineART it is silently inapplicable
+      because the dataset does not declare joint limits and the tool has no profile for this robot.
+    </p>
+  </div>
+
+  <!-- ============ 06 ANNOTATION ============ -->
+  <h2><span class="num">06</span>The annotation layer, measured by hand</h2>
+
+  <div class="col">
+    <p>
+      Because no metric covers it, a standalone script was written to characterise the subtask timeline.
+      Scope: all 242 episodes in <code>data/chunk-000/file-000.parquet</code>, 2,108 subtask segments.
+      This is a larger sample than the audit run and covers a wider task range.
+    </p>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Property</th><th>Result</th><th>Reading</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Segment count vs <code>meta.subtask_count</code></td><td><span class="pill pass">2,108 = 2,108</span></td><td>Zero mismatches across 242 episodes</td></tr>
+        <tr><td>Timestamp monotonicity, non-overlapping</td><td><span class="pill pass">clean</span></td><td>Zero violations</td></tr>
+        <tr><td>Empty annotation text</td><td><span class="pill pass">zero</span></td><td>No blank segments</td></tr>
+        <tr><td>First segment start time</td><td><span class="pill warn">mean 2.79 s</span></td><td>p90 5.19 s, max 14.10 s; 235 of 242 episodes start later than 1 s</td></tr>
+        <tr><td>Last segment vs episode end</td><td><span class="pill pass">by design</span></td><td>p50 gap 8.80 s &mdash; the card defines the final segment as running to episode end; episode 0's last segment is <em>Return to Home Position</em>, which accounts for it</td></tr>
+        <tr><td>Largest gap between adjacent segments</td><td class="num">p50 22.85 s</td><td>p99 60.73 s, max 92.80 s</td></tr>
+        <tr><td><code>language_events</code></td><td><span class="pill na">empty</span></td><td>242 of 242 episodes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>
+      The annotation is internally consistent: counts agree with metadata, timestamps never invert,
+      nothing is blank. The one number that has operational consequences is the leading gap. The
+      dataset card describes roughly the first two seconds as having no active subtask; the measured
+      median is 2.20&nbsp;s, which matches. But the tail is longer than the median suggests &mdash;
+      11% of episodes start later than 5&nbsp;s, the maximum is 14.10&nbsp;s, and in 235 of 242 episodes
+      the gap exceeds one second.
+    </p>
+    <p>
+      For a loader that resolves the active subtask by &ldquo;most recent segment at or before
+      <em>t</em>&rdquo;, frames before the first segment have no answer. <strong>That branch is not an
+      edge case; it fires in essentially every episode.</strong> This is a property of the data layout,
+      not a defect, and it must be handled explicitly rather than discovered at training time.
+    </p>
+  </div>
+
+  <!-- ============ 07 COST ============ -->
+  <h2><span class="num">07</span>Cost at full scale</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Mode</th><th class="num">Measured</th><th class="num">Extrapolated to 40,543 episodes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>With video layer</td><td class="num">49 s/episode</td><td class="num">&asymp; 550 h single-process (&asymp; 23 days)</td></tr>
+        <tr><td><code>--no-video</code></td><td class="num">1.8 s / 6 episodes</td><td class="num">hours &mdash; bound by 23 GB of parquet</td></tr>
+        <tr><td>Peak memory</td><td class="num">&asymp; 0.9 GB</td><td class="num">Safe: data is sharded at 100 MB per file</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>
+      The CLI exposes no concurrency. A full video-layer pass is therefore not a single command but a
+      sharded job: split by chunk, run in parallel, aggregate the JSON. The parquet layer is cheap
+      enough to run whole.
+    </p>
+  </div>
+
+  <!-- ============ 08 REPRODUCTION ============ -->
+  <h2><span class="num">08</span>Reproduction</h2>
+
+  <div class="col">
+<pre><code><span class="c"># install (video layer needs av + opencv)</span>
+pip install robot-data-audit[parquet] "av&gt;=12" "opencv-python-headless"
+
+<span class="c"># structural pass only — fast, whole corpus is feasible</span>
+rda audit /data/FineART --no-video --format json -o fineart_novideo.json
+
+<span class="c"># video layer on a shard — use the state stream as motion source</span>
+rda audit /data/FineART_fold0 --freeze-motion-source state --format json -o fold0.json
+
+<span class="c"># render a shareable report</span>
+python tools/rda_render.py fold0.json --html report.html --badge badge.svg</code></pre>
+    <p class="small" style="margin-top:-8px;">
+      Reading discipline: a clean <code>--no-video</code> run says nothing about the video layer. The
+      video layer must be run with <code>--freeze-motion-source state</code> on FineART, or it will
+      exclude most of the corpus.
+    </p>
+  </div>
+
+  <!-- ============ 09 CORRECTION ============ -->
+  <h2><span class="num">09</span>Corrections</h2>
+
+  <div class="col">
+    <div class="note correction">
+      <span class="label">Correction &mdash; 2026-11-03</span>
+      <p style="margin-bottom:0;">
+        An earlier version of this entry reported the trailing gap between the last subtask and the end
+        of the episode (median 8.80&nbsp;s) as an <em>uncovered</em> region. That was wrong. The dataset
+        card defines the last segment as running to the end of the episode, and episode 0's final
+        segment is <em>Return to Home Position</em> &mdash; 8.7&nbsp;s of homing motion, correctly
+        labelled. The finding was a misreading of the annotation protocol, not a defect in the data.
+        It is kept here rather than deleted, because the failure mode it represents &mdash; reading a
+        layout convention as a data error &mdash; is the one this ledger is most likely to repeat.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ FILES ============ -->
+  <h2><span class="num">10</span>Evidence files</h2>
+
+  <div class="col">
+    <p>
+      Raw output from the runs described above, kept unedited so that any number in this entry can be
+      traced back to the file that produced it.
+    </p>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>File</th><th>Contents</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="../evidence/fineart/rda_fineart_default.json"><code>rda_fineart_default.json</code></a></td><td>Full default run &mdash; 5 EXCLUDE, exit code 2</td></tr>
+        <tr><td><a href="../evidence/fineart/rda_report_fineart_default.html"><code>rda_report_fineart_default.html</code></a></td><td>Single-file shareable report</td></tr>
+        <tr><td><a href="../evidence/fineart/rda_report_injected_defects.json"><code>rda_report_injected_defects.json</code></a></td><td>Defect-injection run &mdash; 2 EXCLUDE / 4 PASS</td></tr>
+        <tr><td><a href="../evidence/fineart/freeze_crosscheck.log"><code>freeze_crosscheck.log</code></a></td><td>Full-resolution re-measurement of all 36 flagged regions</td></tr>
+        <tr><td><a href="../evidence/fineart/subtask_probe.log"><code>subtask_probe.log</code></a></td><td>Annotation-layer probe &mdash; 242 episodes, 2,108 segments</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="site">
+    <span>Entry 01 &middot; audited 2026-11-02</span>
+    <span><a href="../index.html">&larr; Back to ledger</a></span>
+  </footer>
+
+</main>
+
+</body>
+</html>

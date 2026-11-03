@@ -1,0 +1,25 @@
+ep0 cam_high         frames=2597 fullres_med=0.286 p95=1.034 | 64x64_med=0.140 eps=0.100 | flagged=8 region_fullres_mean=0.127 min=0.101 ; ratio_to_episode_median=0.44
+ep0 cam_low          frames=2597 fullres_med=0.870 p95=3.881 | 64x64_med=0.525 eps=0.100 | flagged=0
+ep0 cam_left_wrist   frames=2597 fullres_med=3.460 p95=21.070 | 64x64_med=1.723 eps=0.100 | flagged=0
+ep0 cam_right_wrist  frames=2596 fullres_med=4.869 p95=21.932 | 64x64_med=2.971 eps=0.100 | flagged=0
+ep1 cam_high         frames=2696 fullres_med=0.355 p95=1.593 | 64x64_med=0.199 eps=0.100 | flagged=6 region_fullres_mean=0.116 min=0.078 ; ratio_to_episode_median=0.33
+ep1 cam_low          frames=2696 fullres_med=0.666 p95=2.826 | 64x64_med=0.454 eps=0.100 | flagged=2 region_fullres_mean=0.103 min=0.086 ; ratio_to_episode_median=0.15
+ep1 cam_left_wrist   frames=2696 fullres_med=4.915 p95=19.410 | 64x64_med=3.345 eps=0.100 | flagged=0
+ep1 cam_right_wrist  frames=2696 fullres_med=3.202 p95=15.434 | 64x64_med=2.052 eps=0.100 | flagged=0
+ep2 cam_high         frames=2623 fullres_med=0.292 p95=1.073 | 64x64_med=0.170 eps=0.100 | flagged=7 region_fullres_mean=0.124 min=0.096 ; ratio_to_episode_median=0.42
+ep2 cam_low          frames=2624 fullres_med=0.556 p95=3.129 | 64x64_med=0.380 eps=0.100 | flagged=1 region_fullres_mean=0.100 min=0.100 ; ratio_to_episode_median=0.18
+ep2 cam_left_wrist   frames=2623 fullres_med=3.007 p95=17.413 | 64x64_med=1.576 eps=0.100 | flagged=0
+ep2 cam_right_wrist  frames=2623 fullres_med=2.738 p95=13.364 | 64x64_med=1.619 eps=0.100 | flagged=0
+ep3 cam_high         frames=1512 fullres_med=0.334 p95=1.428 | 64x64_med=0.176 eps=0.100 | flagged=3 region_fullres_mean=0.121 min=0.088 ; ratio_to_episode_median=0.36
+ep3 cam_low          frames=1513 fullres_med=0.777 p95=3.497 | 64x64_med=0.573 eps=0.100 | flagged=0
+ep3 cam_left_wrist   frames=1513 fullres_med=5.734 p95=21.096 | 64x64_med=4.137 eps=0.100 | flagged=0
+ep3 cam_right_wrist  frames=1512 fullres_med=6.321 p95=22.437 | 64x64_med=4.333 eps=0.100 | flagged=0
+ep4 cam_high         frames=1585 fullres_med=0.360 p95=1.486 | 64x64_med=0.196 eps=0.100 | flagged=1 region_fullres_mean=0.147 min=0.147 ; ratio_to_episode_median=0.41
+ep4 cam_low          frames=1585 fullres_med=0.854 p95=3.393 | 64x64_med=0.627 eps=0.100 | flagged=0
+ep4 cam_left_wrist   frames=1585 fullres_med=6.554 p95=19.000 | 64x64_med=4.804 eps=0.100 | flagged=0
+ep4 cam_right_wrist  frames=1585 fullres_med=5.174 p95=18.989 | 64x64_med=3.649 eps=0.100 | flagged=0
+ep5 cam_high         frames=2937 fullres_med=0.326 p95=1.096 | 64x64_med=0.177 eps=0.100 | flagged=5 region_fullres_mean=0.102 min=0.080 ; ratio_to_episode_median=0.31
+ep5 cam_low          frames=2937 fullres_med=0.763 p95=2.288 | 64x64_med=0.518 eps=0.100 | flagged=3 region_fullres_mean=0.063 min=0.059 ; ratio_to_episode_median=0.08
+ep5 cam_left_wrist   frames=2937 fullres_med=3.437 p95=17.699 | 64x64_med=2.153 eps=0.113 | flagged=0
+ep5 cam_right_wrist  frames=2937 fullres_med=4.139 p95=18.229 | 64x64_med=2.697 eps=0.100 | flagged=0
+TOTAL flagged regions 36 | regions whose mean diff <10% of episode median (look like true freeze): 3
