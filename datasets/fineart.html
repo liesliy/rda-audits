@@ -56,6 +56,26 @@
     </div>
   </div>
 
+  <!-- ============ UPDATE ============ -->
+  <div class="note correction">
+    <span class="label">Update &mdash; 2026-11-03 &middot; fixed in 0.12.2</span>
+    <p>
+      Section 04 documents a false positive in <code>video_freeze</code> as measured on 0.12.1. That
+      was a defect in the tool, not a property of the dataset, and it is fixed in 0.12.2. The
+      criterion changed in kind: from <em>&ldquo;the frame difference is small&rdquo;</em> &mdash; an
+      absolute epsilon, <code>max(0.10, 0.25 &times; p10)</code>, which in a fixed overhead view sits
+      inside the normal distribution &mdash; to <em>&ldquo;the camera re-sent the previous
+      frame&rdquo;</em>, a duplicate epsilon bounded above by half the stream&rsquo;s own 25th
+      percentile.
+    </p>
+    <p style="margin-bottom:0;">
+      Re-running this exact 6-episode subset on the published 0.12.2 wheel returns
+      <strong>6/6 PASS, zero flagged regions, exit 0</strong>. Section 04 is kept as written: it is
+      the record of what 0.12.1 did to this data, and it is the reason the criterion exists in its
+      current form.
+    </p>
+  </div>
+
   <!-- ============ VERDICT ============ -->
   <div class="verdict">
     <div class="top">

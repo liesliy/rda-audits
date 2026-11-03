@@ -7,7 +7,13 @@
     "source": "pypi"
   },
   "schema": {
-    "verdict": ["pass", "pass_with_caveats", "fail", "uncovered", "queued"],
+    "verdict": [
+      "pass",
+      "pass_with_caveats",
+      "fail",
+      "uncovered",
+      "queued"
+    ],
     "note": "verdict is the author's judgement after reconciling tool output against independent re-measurement; it is never the raw exit code."
   },
   "entries": [
@@ -28,7 +34,14 @@
       "license": "CC BY 4.0 (data); Gemma license (weights)",
       "sample": {
         "episodes": 6,
-        "episode_indices": [0, 1, 2, 3, 4, 5],
+        "episode_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
         "frames": 13949,
         "fraction_of_corpus": 0.00015
       },
@@ -66,8 +79,18 @@
       "detection_validation": {
         "method": "defect injection on a copy of the subset",
         "injected": [
-          {"episode": 3, "defect": "10 frames of observation.state set to NaN", "detected": true, "reason": "invalid_values (L1): 10 NaN + 0 Inf values"},
-          {"episode": 4, "defect": "50 consecutive frames removed", "detected": true, "reason": "missing_dropout (L1): 50 missing frame(s)"}
+          {
+            "episode": 3,
+            "defect": "10 frames of observation.state set to NaN",
+            "detected": true,
+            "reason": "invalid_values (L1): 10 NaN + 0 Inf values"
+          },
+          {
+            "episode": 4,
+            "defect": "50 consecutive frames removed",
+            "detected": true,
+            "reason": "missing_dropout (L1): 50 missing frame(s)"
+          }
         ],
         "false_negatives": 0,
         "collateral_exclusions": 0
@@ -77,9 +100,18 @@
           "id": "freeze_false_positive",
           "severity": "high",
           "check": "video_freeze",
-          "default_run": {"pass": 0, "review": 1, "exclude": 5, "exit_code": 2, "wall_seconds": 292},
+          "default_run": {
+            "pass": 0,
+            "review": 1,
+            "exclude": 5,
+            "exit_code": 2,
+            "wall_seconds": 292
+          },
           "mitigated_run": {
-            "flags": ["--freeze-motion-source", "state"],
+            "flags": [
+              "--freeze-motion-source",
+              "state"
+            ],
             "pass": 0,
             "review": 6,
             "exclude": 0,
@@ -95,9 +127,18 @@
           },
           "independent_recheck": {
             "method": "full-resolution grayscale re-decode, per-frame mean absolute difference",
-            "region_diff_range": [0.10, 0.15],
-            "episode_median_diff_range": [0.29, 0.87],
-            "ratio_range": [0.08, 0.44],
+            "region_diff_range": [
+              0.1,
+              0.15
+            ],
+            "episode_median_diff_range": [
+              0.29,
+              0.87
+            ],
+            "ratio_range": [
+              0.08,
+              0.44
+            ],
             "regions_approaching_true_freeze": 3,
             "true_freeze_locations": "cam_low, episode 5"
           },
@@ -107,7 +148,12 @@
         {
           "id": "annotation_layer_uncovered",
           "severity": "high",
-          "scope": ["language_persistent", "language_events", "episode summary", "success metadata"],
+          "scope": [
+            "language_persistent",
+            "language_events",
+            "episode summary",
+            "success metadata"
+          ],
           "metric_coverage": 0,
           "cause": "columns match neither observation.* nor action, dropped in _extract_episode_from_dataframe",
           "status": "open"
@@ -140,13 +186,31 @@
       ],
       "annotation_probe": {
         "method": "standalone script, independent of the tool",
-        "scope": {"episodes": 242, "segments": 2108, "source": "data/chunk-000/file-000.parquet"},
+        "scope": {
+          "episodes": 242,
+          "segments": 2108,
+          "source": "data/chunk-000/file-000.parquet"
+        },
         "segment_count_matches_metadata": true,
         "monotonic_timestamps": true,
         "empty_segments": 0,
-        "first_segment_start_seconds": {"mean": 2.79, "p90": 5.19, "max": 14.10, "episodes_over_1s": 235},
-        "trailing_gap_seconds": {"p50": 8.80, "p90": 15.08, "max": 21.83, "is_defect": false},
-        "adjacent_gap_seconds": {"p50": 22.85, "p99": 60.73, "max": 92.80},
+        "first_segment_start_seconds": {
+          "mean": 2.79,
+          "p90": 5.19,
+          "max": 14.1,
+          "episodes_over_1s": 235
+        },
+        "trailing_gap_seconds": {
+          "p50": 8.8,
+          "p90": 15.08,
+          "max": 21.83,
+          "is_defect": false
+        },
+        "adjacent_gap_seconds": {
+          "p50": 22.85,
+          "p99": 60.73,
+          "max": 92.8
+        },
         "language_events_empty_episodes": 242,
         "operational_note": "frames before the first subtask have no active label in 235 of 242 episodes; loaders must handle this branch explicitly"
       },
@@ -155,14 +219,39 @@
         "extrapolated_hours_full_corpus": 550,
         "no_video_wall_seconds_for_6_episodes": 1.8,
         "peak_memory_gb": 0.9
+      },
+      "recheck": {
+        "date": "2026-11-03",
+        "tool_version": "0.12.2",
+        "source": "pypi",
+        "reason": "video_freeze false positive (D-27) fixed upstream; same 6-episode subset re-audited",
+        "result": {
+          "pass": 6,
+          "review": 0,
+          "exclude": 0,
+          "exit_code": 0,
+          "freeze_region_count": 0
+        }
       }
     }
   ],
   "queued": [
-    {"repo": "lerobot/droid_1.0.1", "reason": "same v3.0 layout, next in queue"},
-    {"repo": "lerobot/libero", "reason": "no subtask annotations; structural-only audit"},
-    {"repo": "lerobot/pusht", "reason": "v2.1 format; tests backwards compatibility path"},
-    {"repo": "lerobot/aloha_sim_transfer_cube_human", "reason": "simulated ALOHA; tests whether the freeze false positive reproduces"}
+    {
+      "repo": "lerobot/droid_1.0.1",
+      "reason": "same v3.0 layout, next in queue"
+    },
+    {
+      "repo": "lerobot/libero",
+      "reason": "no subtask annotations; structural-only audit"
+    },
+    {
+      "repo": "lerobot/pusht",
+      "reason": "v2.1 format; tests backwards compatibility path"
+    },
+    {
+      "repo": "lerobot/aloha_sim_transfer_cube_human",
+      "reason": "simulated ALOHA; tests whether the freeze false positive reproduces"
+    }
   ],
   "corrections": [
     {
